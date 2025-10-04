@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import requests
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -224,6 +225,24 @@ def get_activity_icon(activity_type):
     }
     return icon_map.get(activity_type, 'info-circle')
 
+def get_next_approver(expense):
+    """Get the next approver for an expense based on approval rules"""
+    try:
+        # For now, return the user's manager as the approver
+        if expense.user.manager_id:
+            return User.query.get(expense.user.manager_id)
+        
+        # If no manager, find any manager in the company
+        manager = User.query.filter_by(
+            company_id=expense.company_id, 
+            role='Manager'
+        ).first()
+        
+        return manager
+    except Exception as e:
+        print(f"Error getting next approver: {e}")
+        return None
+
 # Routes
 @app.route('/')
 def index():
@@ -248,6 +267,139 @@ def admin_dashboard():
         flash('Access denied. Admin privileges required.', 'danger')
         return redirect(url_for('dashboard'))
     return render_template('admin_dashboard.html', user=current_user)
+
+# Expense Routes
+@app.route('/submit_expense', methods=['GET', 'POST'])
+@login_required
+def submit_expense():
+    """Submit new expense"""
+    if request.method == 'POST':
+        try:
+            # Get form data
+            amount = request.form.get('amount')
+            category = request.form.get('category')
+            description = request.form.get('description')
+            expense_date = request.form.get('expense_date')
+            receipt_name = request.form.get('receipt_name')
+            
+            # Validate required fields
+            if not all([amount, category, expense_date]):
+                flash('Please fill in all required fields', 'danger')
+                return render_template('submit_expense.html')
+            
+            # Create expense record
+            expense = Expense(
+                user_id=current_user.user_id,
+                company_id=current_user.company_id,
+                amount=float(amount),
+                currency_code=current_user.company.currency_code,
+                category=category,
+                description=description,
+                expense_date=datetime.strptime(expense_date, '%Y-%m-%d').date(),
+                receipt_url=receipt_name,
+                status='pending'
+            )
+            
+            db.session.add(expense)
+            db.session.commit()
+            
+            # Get next approver and create approval record
+            approver = get_next_approver(expense)
+            if approver:
+                approval = ExpenseApproval(
+                    expense_id=expense.expense_id,
+                    approver_id=approver.user_id,
+                    action='pending',
+                    comments='Waiting for approval'
+                )
+                db.session.add(approval)
+                db.session.commit()
+            
+            # Log activity
+            log_activity('expense_submitted', f'Submitted expense for ${amount} in {category}')
+            
+            flash('Expense submitted successfully! Waiting for approval.', 'success')
+            return redirect(url_for('view_expenses'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Expense submission error: {e}")
+            flash('Error submitting expense. Please try again.', 'danger')
+            return render_template('submit_expense.html')
+    
+    return render_template('submit_expense.html')
+
+@app.route('/view_expenses')
+@login_required
+def view_expenses():
+    """View user's expenses"""
+    expenses = Expense.query.filter_by(user_id=current_user.user_id).order_by(Expense.created_at.desc()).all()
+    return render_template('view_expenses.html', expenses=expenses)
+
+@app.route('/pending_approvals')
+@login_required
+def pending_approvals():
+    """View expenses pending approval for managers/admins"""
+    if current_user.role not in ['Manager', 'Admin']:
+        flash('Access denied. Manager privileges required.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get expenses that need approval from this user
+    pending_expenses = Expense.query.join(ExpenseApproval).filter(
+        ExpenseApproval.approver_id == current_user.user_id,
+        ExpenseApproval.action == 'pending',
+        Expense.company_id == current_user.company_id
+    ).all()
+    
+    return render_template('pending_approvals.html', expenses=pending_expenses)
+
+@app.route('/approve_expense/<int:expense_id>', methods=['POST'])
+@login_required
+def approve_expense(expense_id):
+    """Approve or reject an expense"""
+    if current_user.role not in ['Manager', 'Admin']:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    try:
+        action = request.json.get('action')
+        comments = request.json.get('comments', '')
+        
+        expense = Expense.query.get_or_404(expense_id)
+        approval = ExpenseApproval.query.filter_by(
+            expense_id=expense_id,
+            approver_id=current_user.user_id,
+            action='pending'
+        ).first()
+        
+        if not approval:
+            return jsonify({'error': 'Approval not found or already processed'}), 404
+        
+        # Update approval record
+        approval.action = action
+        approval.comments = comments
+        approval.created_at = datetime.utcnow()
+        
+        # Update expense status
+        if action == 'approved':
+            expense.status = 'approved'
+            activity_type = 'expense_approved'
+            activity_desc = f'Approved expense #{expense_id} for ${expense.amount}'
+        else:
+            expense.status = 'rejected'
+            activity_type = 'expense_rejected'
+            activity_desc = f'Rejected expense #{expense_id} for ${expense.amount}'
+        
+        db.session.commit()
+        
+        # Log activity
+        log_activity(activity_type, activity_desc)
+        
+        return jsonify({'success': True, 'message': f'Expense {action} successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Approval error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 # API Routes for Admin Dashboard
 @app.route('/api/admin/stats')
