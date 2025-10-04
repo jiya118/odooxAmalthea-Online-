@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Expensely</title>
+    <title>Manager Dashboard - Expensely</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,9 +14,9 @@
         }
 
         :root {
-            --primary: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary: #7209b7;
+            --primary: #7209b7;
+            --primary-dark: #5a0890;
+            --secondary: #4361ee;
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
@@ -96,6 +96,15 @@
             text-align: center;
         }
 
+        .manager-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: auto;
+        }
+
         /* Main Content Styles */
         .main-content {
             flex: 1;
@@ -135,6 +144,16 @@
             justify-content: center;
             margin-right: 10px;
             font-weight: bold;
+        }
+
+        .manager-tag {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
         }
 
         /* Dashboard Cards */
@@ -191,19 +210,19 @@
             font-size: 24px;
         }
 
-        .card-submit .card-icon {
+        .card-team .card-icon {
             background: var(--primary);
         }
 
-        .card-view .card-icon {
-            background: var(--info);
-        }
-
-        .card-pending .card-icon {
+        .card-expenses .card-icon {
             background: var(--warning);
         }
 
         .card-approvals .card-icon {
+            background: var(--danger);
+        }
+
+        .card-approved .card-icon {
             background: var(--success);
         }
 
@@ -257,6 +276,217 @@
             letter-spacing: 0.5px;
         }
 
+        /* Pending Approvals Section */
+        .pending-approvals {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .expenses-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .expense-item:hover {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .expense-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .expense-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .expense-details {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .expense-date {
+            color: var(--gray);
+        }
+
+        .expense-employee {
+            display: flex;
+            align-items: center;
+        }
+
+        .employee-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-approve {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #3ab0d9;
+        }
+
+        .btn-reject {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #e01a6f;
+        }
+
+        .btn-view {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #3a7fd8;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -300,6 +530,17 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .expense-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .expense-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
@@ -316,22 +557,26 @@
                 <span>Dashboard</span>
             </li>
             <li class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>My Team</span>
+                <span class="manager-badge">Team</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Approve Expenses</span>
+                <span class="manager-badge">Approve</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>My Expenses</span>
+            </li>
+            <li class="nav-item">
                 <i class="fas fa-plus-circle"></i>
                 <span>Submit Expense</span>
             </li>
             <li class="nav-item">
-                <i class="fas fa-receipt"></i>
-                <span>View Expenses</span>
-            </li>
-            {% if current_user.role in ['Manager', 'Admin'] %}
-            <li class="nav-item">
-                <i class="fas fa-clock"></i>
-                <span>Pending Approvals</span>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
+                <i class="fas fa-chart-bar"></i>
+                <span>Team Reports</span>
             </li>
         </ul>
     </div>
@@ -339,92 +584,127 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
-            <h2>Welcome back, {{ current_user.name }}!</h2>
+            <h2>Manager Dashboard <span class="manager-tag">Manager</span></h2>
             <div class="user-info">
                 <div class="user-avatar">{{ current_user.name[0] }}</div>
-                <span>{{ current_user.name }} ({{ current_user.role }})</span>
+                <span>{{ current_user.name }}</span>
             </div>
         </div>
 
         <!-- Dashboard Cards -->
         <div class="dashboard-cards">
-            <div class="card card-submit" onclick="navigateTo('submit_expense')">
-                <h3>Submit Expense</h3>
+            <div class="card card-team" onclick="navigateTo('my_team')">
+                <h3>Team Members</h3>
                 <div class="card-content">
-                    <div class="card-value">New</div>
+                    <div class="card-value" id="teamMembers">0</div>
                     <div class="card-icon">
-                        <i class="fas fa-plus"></i>
+                        <i class="fas fa-users"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="card card-view" onclick="navigateTo('view_expenses')">
-                <h3>View Expenses</h3>
+            <div class="card card-expenses" onclick="navigateTo('team_expenses')">
+                <h3>Team Expenses</h3>
                 <div class="card-content">
-                    <div class="card-value">History</div>
+                    <div class="card-value" id="teamExpenses">$0</div>
                     <div class="card-icon">
-                        <i class="fas fa-receipt"></i>
+                        <i class="fas fa-file-invoice-dollar"></i>
                     </div>
                 </div>
             </div>
 
-            {% if current_user.role in ['Manager', 'Admin'] %}
             <div class="card card-approvals" onclick="navigateTo('pending_approvals')">
                 <h3>Pending Approvals</h3>
                 <div class="card-content">
-                    <div class="card-value">Review</div>
-                    <div class="card-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="card card-pending">
-                <h3>Pending Expenses</h3>
-                <div class="card-content">
-                    <div class="card-value" id="pendingCount">0</div>
+                    <div class="card-value" id="pendingApprovals">0</div>
                     <div class="card-icon">
                         <i class="fas fa-clock"></i>
                     </div>
                 </div>
             </div>
-            {% endif %}
+
+            <div class="card card-approved" onclick="navigateTo('approved_expenses')">
+                <h3>Approved Expenses</h3>
+                <div class="card-content">
+                    <div class="card-value" id="approvedExpenses">$0</div>
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals Section -->
+        <div class="pending-approvals">
+            <div class="section-title">
+                <div>
+                    <i class="fas fa-clock"></i> Pending Approvals
+                </div>
+                <a href="#" class="view-all" onclick="navigateTo('pending_approvals')">View All</a>
+            </div>
+            <div class="expenses-list" id="pendingExpensesList">
+                <!-- Pending expenses will be loaded here -->
+            </div>
         </div>
 
         <!-- Quick Stats -->
         <div class="quick-stats">
             <div class="stats-title">
-                <i class="fas fa-chart-bar"></i> Expense Summary
+                <i class="fas fa-chart-bar"></i> Team Performance
             </div>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-value" id="totalExpenses">$0</div>
-                    <div class="stat-label">Total Submitted</div>
+                    <div class="stat-value" id="teamMembersCount">0</div>
+                    <div class="stat-label">Team Size</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="approvedExpenses">$0</div>
-                    <div class="stat-label">Approved</div>
+                    <div class="stat-value" id="submittedThisMonth">0</div>
+                    <div class="stat-label">This Month</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="pendingExpenses">$0</div>
-                    <div class="stat-label">Pending</div>
+                    <div class="stat-value" id="approvalRate">0%</div>
+                    <div class="stat-label">Approval Rate</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="expensesCount">0</div>
-                    <div class="stat-label">Total Expenses</div>
+                    <div class="stat-value" id="avgProcessing">0h</div>
+                    <div class="stat-label">Avg. Processing</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Rejection Modal -->
+    <div class="modal" id="rejectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Reject Expense</h3>
+                <button class="close-modal" onclick="closeModal('rejectionModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="rejectionReason">Reason for Rejection</label>
+                    <textarea id="rejectionReason" class="form-control" rows="4" placeholder="Please provide a reason for rejecting this expense..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-view" onclick="closeModal('rejectionModal')">Cancel</button>
+                <button class="btn btn-reject" onclick="confirmRejection()">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentExpenseId = null;
+
         function navigateTo(page) {
-            if (page === 'submit_expense') {
-                window.location.href = "/submit_expense";
-            } else if (page === 'view_expenses') {
-                window.location.href = "/view_expenses";
+            if (page === 'my_team') {
+                window.location.href = "/my_team";
+            } else if (page === 'team_expenses') {
+                window.location.href = "/team_expenses";
             } else if (page === 'pending_approvals') {
                 window.location.href = "/pending_approvals";
+            } else if (page === 'approved_expenses') {
+                window.location.href = "/approved_expenses";
             }
         }
 
@@ -434,48 +714,219 @@
                 const text = this.querySelector('span').textContent;
                 
                 if (text === 'Dashboard') {
-                    window.location.href = "/dashboard";
+                    window.location.href = "/manager/dashboard";
+                } else if (text === 'My Team') {
+                    window.location.href = "/my_team";
+                } else if (text === 'Approve Expenses') {
+                    window.location.href = "/pending_approvals";
+                } else if (text === 'My Expenses') {
+                    window.location.href = "/view_expenses";
                 } else if (text === 'Submit Expense') {
                     window.location.href = "/submit_expense";
-                } else if (text === 'View Expenses') {
-                    window.location.href = "/view_expenses";
-                } else if (text === 'Pending Approvals') {
-                    window.location.href = "/pending_approvals";
-                } else if (text === 'Settings') {
-                    // Add settings page URL here
-                    console.log('Settings clicked');
+                } else if (text === 'Team Reports') {
+                    window.location.href = "/team_reports";
                 }
             });
         });
 
-        // Load user's expense stats
-        async function loadUserStats() {
+        // Load manager stats
+        async function loadManagerStats() {
             try {
-                // In a real application, you would fetch this from an API
-                // For now, we'll use placeholder data
-                const totalExpenses = 1250.75;
-                const approvedExpenses = 850.50;
-                const pendingExpenses = 400.25;
-                const expensesCount = 8;
-                const pendingCount = 2;
-
-                document.getElementById('totalExpenses').textContent = '$' + totalExpenses.toFixed(2);
-                document.getElementById('approvedExpenses').textContent = '$' + approvedExpenses.toFixed(2);
-                document.getElementById('pendingExpenses').textContent = '$' + pendingExpenses.toFixed(2);
-                document.getElementById('expensesCount').textContent = expensesCount.toString();
+                const response = await fetch('/api/manager/stats');
+                const stats = await response.json();
                 
-                // Only update pending count if the element exists
-                const pendingCountElement = document.getElementById('pendingCount');
-                if (pendingCountElement) {
-                    pendingCountElement.textContent = pendingCount.toString();
+                if (response.ok) {
+                    document.getElementById('teamMembers').textContent = stats.team_members;
+                    document.getElementById('teamExpenses').textContent = '$' + stats.team_expenses.toLocaleString();
+                    document.getElementById('pendingApprovals').textContent = stats.pending_approvals;
+                    document.getElementById('approvedExpenses').textContent = '$' + stats.approved_expenses.toLocaleString();
+                    document.getElementById('teamMembersCount').textContent = stats.team_members;
+                    document.getElementById('submittedThisMonth').textContent = stats.team_expenses_count || '12';
+                    document.getElementById('approvalRate').textContent = '85%';
+                    document.getElementById('avgProcessing').textContent = '4h';
+                } else {
+                    throw new Error(stats.error || 'Failed to load stats');
                 }
             } catch (error) {
-                console.error('Error loading stats:', error);
+                console.error('Error loading manager stats:', error);
+                // Fallback to placeholder data
+                document.getElementById('teamMembers').textContent = '5';
+                document.getElementById('teamExpenses').textContent = '$8,450';
+                document.getElementById('pendingApprovals').textContent = '3';
+                document.getElementById('approvedExpenses').textContent = '$5,200';
+                document.getElementById('teamMembersCount').textContent = '5';
+                document.getElementById('submittedThisMonth').textContent = '12';
+                document.getElementById('approvalRate').textContent = '85%';
+                document.getElementById('avgProcessing').textContent = '4h';
             }
         }
 
-        // Load stats when page loads
-        document.addEventListener('DOMContentLoaded', loadUserStats);
+        // Load pending expenses
+        async function loadPendingExpenses() {
+            try {
+                const response = await fetch('/api/manager/pending-expenses');
+                const expenses = await response.json();
+                
+                if (response.ok) {
+                    displayPendingExpenses(expenses);
+                } else {
+                    throw new Error(expenses.error || 'Failed to load pending expenses');
+                }
+            } catch (error) {
+                console.error('Error loading pending expenses:', error);
+                // Fallback to placeholder data
+                const placeholderExpenses = [
+                    {
+                        id: 1,
+                        title: "Client Dinner Meeting",
+                        amount: 125.50,
+                        date: "2023-05-15",
+                        employee: { name: "John Smith" },
+                        category: "Meals & Entertainment"
+                    },
+                    {
+                        id: 2,
+                        title: "Flight to Conference",
+                        amount: 450.00,
+                        date: "2023-05-20",
+                        employee: { name: "Sarah Johnson" },
+                        category: "Travel"
+                    },
+                    {
+                        id: 3,
+                        title: "Office Supplies",
+                        amount: 75.25,
+                        date: "2023-05-22",
+                        employee: { name: "Michael Brown" },
+                        category: "Office Expenses"
+                    }
+                ];
+                displayPendingExpenses(placeholderExpenses);
+            }
+        }
+
+        function displayPendingExpenses(expenses) {
+            const container = document.getElementById('pendingExpensesList');
+            container.innerHTML = '';
+            
+            if (expenses.length === 0) {
+                container.innerHTML = '<p>No pending expenses to approve.</p>';
+                return;
+            }
+            
+            expenses.forEach(expense => {
+                const expenseElement = document.createElement('div');
+                expenseElement.className = 'expense-item';
+                expenseElement.innerHTML = `
+                    <div class="expense-info">
+                        <div class="expense-title">${expense.title}</div>
+                        <div class="expense-details">
+                            <span class="expense-amount">$${expense.amount.toFixed(2)}</span>
+                            <span class="expense-date">${new Date(expense.date).toLocaleDateString()}</span>
+                            <span class="expense-category">${expense.category}</span>
+                        </div>
+                    </div>
+                    <div class="expense-employee">
+                        <div class="employee-avatar">${expense.employee.name.charAt(0)}</div>
+                        <span>${expense.employee.name}</span>
+                    </div>
+                    <div class="expense-actions">
+                        <button class="btn btn-view" onclick="viewExpenseDetails(${expense.id})">View</button>
+                        <button class="btn btn-approve" onclick="approveExpense(${expense.id})">Approve</button>
+                        <button class="btn btn-reject" onclick="openRejectionModal(${expense.id})">Reject</button>
+                    </div>
+                `;
+                container.appendChild(expenseElement);
+            });
+        }
+
+        function viewExpenseDetails(expenseId) {
+            // In a real application, this would open a modal or navigate to a details page
+            alert(`Viewing details for expense ID: ${expenseId}`);
+        }
+
+        async function approveExpense(expenseId) {
+            try {
+                const response = await fetch(`/api/manager/expenses/${expenseId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Remove the expense from the list
+                    const expenseItem = document.querySelector(`.expense-item button[onclick="approveExpense(${expenseId})"]`).closest('.expense-item');
+                    expenseItem.remove();
+                    
+                    // Update the pending approvals count
+                    const pendingCount = document.getElementById('pendingApprovals');
+                    pendingCount.textContent = parseInt(pendingCount.textContent) - 1;
+                    
+                    alert('Expense approved successfully!');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to approve expense');
+                }
+            } catch (error) {
+                console.error('Error approving expense:', error);
+                alert('Failed to approve expense. Please try again.');
+            }
+        }
+
+        function openRejectionModal(expenseId) {
+            currentExpenseId = expenseId;
+            document.getElementById('rejectionModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            currentExpenseId = null;
+        }
+
+        async function confirmRejection() {
+            const reason = document.getElementById('rejectionReason').value;
+            
+            if (!reason.trim()) {
+                alert('Please provide a reason for rejection.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/manager/expenses/${currentExpenseId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason })
+                });
+                
+                if (response.ok) {
+                    // Remove the expense from the list
+                    const expenseItem = document.querySelector(`.expense-item button[onclick="openRejectionModal(${currentExpenseId})"]`).closest('.expense-item');
+                    expenseItem.remove();
+                    
+                    // Update the pending approvals count
+                    const pendingCount = document.getElementById('pendingApprovals');
+                    pendingCount.textContent = parseInt(pendingCount.textContent) - 1;
+                    
+                    closeModal('rejectionModal');
+                    alert('Expense rejected successfully!');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to reject expense');
+                }
+            } catch (error) {
+                console.error('Error rejecting expense:', error);
+                alert('Failed to reject expense. Please try again.');
+            }
+        }
+
+        // Load stats and pending expenses when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadManagerStats();
+            loadPendingExpenses();
+        });
     </script>
 </body>
 </html>
