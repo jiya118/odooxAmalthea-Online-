@@ -18,7 +18,17 @@ app = Flask(__name__,
 
 # MySQL Database Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost/auth_system'
+# Allow overriding the DB with an environment variable for production/testing.
+# If DATABASE_URL isn't set, fall back to a local SQLite DB so the app can run
+# immediately without requiring a MySQL server.
+db_uri = os.environ.get('DATABASE_URL')
+if not db_uri:
+    # place the sqlite DB next to this file for convenience
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    db_path = os.path.join(basedir, 'dev.db')
+    db_uri = f'sqlite:///{db_path}'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 300,
