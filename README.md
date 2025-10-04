@@ -28,7 +28,7 @@ The system allows users to submit expense claims, track approval status, and for
 
  **Backend:** Python, Flask  
  **Frontend:** HTML, CSS  
- **Database:** SQLite (`dev.db`)  
+ **Database:** SQLite 
  **Authentication:** Flask session-based  
  **Deployment:** Localhost / Cloud (optional)
 
@@ -76,8 +76,6 @@ The system allows users to submit expense claims, track approval status, and for
 
 ## 📁 Future Enhancements
 
- Email notifications for approvals/rejections  
- Role-based access control (RBAC)  
+ Email notifications for approvals/rejections   
  Export expense reports (PDF/Excel)  
- Dashboard analytics  
 
