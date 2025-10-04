@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import requests
+import json
+from werkzeug.utils import secure_filename
 import uuid
 
 # Load environment variables
