@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Login</h1>
+            <p class="auth-subtitle">Welcome back to Expensely</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-input" required 
+                       placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required 
+                       placeholder="Enter your password">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" name="remember"> Remember me
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Login
+            </button>
+
+            <div class="form-links mt-3">
+                <a href="{{ url_for('reset_request') }}" class="form-link">Forgot your password?</a>
+            </div>
+
+            <div class="form-divider">
+                <span>Don't have an account?</span>
+            </div>
+
+            <a href="{{ url_for('signup') }}" class="btn btn-secondary">
+                Sign Up
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}
