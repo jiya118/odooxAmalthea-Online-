@@ -1,50 +1,481 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Expensely</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-{% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">Welcome back, {{ current_user.name }}!</h1>
-        <p class="dashboard-subtitle">Here's what's happening with your expenses today.</p>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --border: #e0e0e0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header h2 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--primary);
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .card-submit .card-icon {
+            background: var(--primary);
+        }
+
+        .card-view .card-icon {
+            background: var(--info);
+        }
+
+        .card-pending .card-icon {
+            background: var(--warning);
+        }
+
+        .card-approvals .card-icon {
+            background: var(--success);
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .stats-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .sidebar .logo h1, .sidebar .nav-item span {
+                display: none;
+            }
+            
+            .sidebar .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar .nav-item i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-chart-pie"></i>
+            <h1>Expensely</h1>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-plus-circle"></i>
+                <span>Submit Expense</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>View Expenses</span>
+            </li>
+            {% if current_user.role in ['Manager', 'Admin'] %}
+            <li class="nav-item">
+                <i class="fas fa-clock"></i>
+                <span>Pending Approvals</span>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </li>
+        </ul>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div style="background: var(--surface); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
-            <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Expenses</h3>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">$0.00</p>
-        </div>
-        
-        <div style="background: var(--surface); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
-            <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Pending Approval</h3>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--warning-color);">0</p>
-        </div>
-        
-        <div style="background: var(--surface); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
-            <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Approved This Month</h3>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--success-color);">0</p>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div style="background: var(--surface); padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
-            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Quick Actions</h3>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <a href="#" class="btn btn-primary">Submit New Expense</a>
-                <a href="#" class="btn btn-secondary">View My Expenses</a>
-                {% if current_user.role in ['Manager', 'Admin'] %}
-                <a href="#" class="btn btn-secondary">Pending Approvals</a>
-                {% endif %}
-                {% if current_user.role == 'Admin' %}
-                <a href="{{ url_for('auth.manage_users') }}" class="btn btn-secondary">Manage Users</a>
-                {% endif %}
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2>Welcome back, {{ current_user.name }}!</h2>
+            <div class="user-info">
+                <div class="user-avatar">{{ current_user.name[0] }}</div>
+                <span>{{ current_user.name }} ({{ current_user.role }})</span>
             </div>
         </div>
-        
-        <div style="background: var(--surface); padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow);">
-            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Recent Activity</h3>
-            <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
-                No recent activity
-            </p>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-cards">
+            <div class="card card-submit" onclick="navigateTo('submit_expense')">
+                <h3>Submit Expense</h3>
+                <div class="card-content">
+                    <div class="card-value">New</div>
+                    <div class="card-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-view" onclick="navigateTo('view_expenses')">
+                <h3>View Expenses</h3>
+                <div class="card-content">
+                    <div class="card-value">History</div>
+                    <div class="card-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                </div>
+            </div>
+
+            {% if current_user.role in ['Manager', 'Admin'] %}
+            <div class="card card-approvals" onclick="navigateTo('pending_approvals')">
+                <h3>Pending Approvals</h3>
+                <div class="card-content">
+                    <div class="card-value">Review</div>
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card card-pending">
+                <h3>Pending Expenses</h3>
+                <div class="card-content">
+                    <div class="card-value" id="pendingCount">0</div>
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stats-title">
+                <i class="fas fa-chart-bar"></i> Expense Summary
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalExpenses">$0</div>
+                    <div class="stat-label">Total Submitted</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="approvedExpenses">$0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="pendingExpenses">$0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="expensesCount">0</div>
+                    <div class="stat-label">Total Expenses</div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        function navigateTo(page) {
+            if (page === 'submit_expense') {
+                window.location.href = "/submit_expense";
+            } else if (page === 'view_expenses') {
+                window.location.href = "/view_expenses";
+            } else if (page === 'pending_approvals') {
+                window.location.href = "/pending_approvals";
+            }
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                const text = this.querySelector('span').textContent;
+                
+                if (text === 'Dashboard') {
+                    window.location.href = "/dashboard";
+                } else if (text === 'Submit Expense') {
+                    window.location.href = "/submit_expense";
+                } else if (text === 'View Expenses') {
+                    window.location.href = "/view_expenses";
+                } else if (text === 'Pending Approvals') {
+                    window.location.href = "/pending_approvals";
+                } else if (text === 'Settings') {
+                    // Add settings page URL here
+                    console.log('Settings clicked');
+                }
+            });
+        });
+
+        // Load user's expense stats
+        async function loadUserStats() {
+            try {
+                // In a real application, you would fetch this from an API
+                // For now, we'll use placeholder data
+                const totalExpenses = 1250.75;
+                const approvedExpenses = 850.50;
+                const pendingExpenses = 400.25;
+                const expensesCount = 8;
+                const pendingCount = 2;
+
+                document.getElementById('totalExpenses').textContent = '$' + totalExpenses.toFixed(2);
+                document.getElementById('approvedExpenses').textContent = '$' + approvedExpenses.toFixed(2);
+                document.getElementById('pendingExpenses').textContent = '$' + pendingExpenses.toFixed(2);
+                document.getElementById('expensesCount').textContent = expensesCount.toString();
+                
+                // Only update pending count if the element exists
+                const pendingCountElement = document.getElementById('pendingCount');
+                if (pendingCountElement) {
+                    pendingCountElement.textContent = pendingCount.toString();
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load stats when page loads
+        document.addEventListener('DOMContentLoaded', loadUserStats);
+    </script>
+</body>
+</html>

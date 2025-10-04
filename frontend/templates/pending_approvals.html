@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Approvals - Expensely</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --border: #e0e0e0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header h2 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Approval Cards */
+        .approvals-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .approval-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--warning);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .approval-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .approval-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .approval-user {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .approval-details {
+            flex: 1;
+        }
+
+        .approval-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .approval-meta {
+            display: flex;
+            gap: 20px;
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .approval-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-approve {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #3ab8d9;
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #e51679;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .no-approvals {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--gray);
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .no-approvals i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--border);
+        }
+
+        .no-approvals h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .no-approvals p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 25px 25px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--dark);
+            font-size: 20px;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            z-index: 1100;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            min-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--danger);
+        }
+
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Expense Description Box */
+        .description-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+            border-left: 3px solid var(--info);
+        }
+
+        .description-box strong {
+            color: var(--dark);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .description-box p {
+            margin: 0;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .sidebar .logo h1, .sidebar .nav-item span {
+                display: none;
+            }
+            
+            .sidebar .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar .nav-item i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .user-info {
+                margin-top: 0;
+            }
+            
+            .approval-header {
+                flex-direction: column;
+            }
+            
+            .approval-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .approval-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .toast {
+                min-width: 250px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .approval-card {
+                padding: 20px;
+            }
+            
+            .approval-amount {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* Loading Spinner */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+        }
+
+        .status-approved {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+        }
+
+        .status-rejected {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-chart-pie"></i>
+            <h1>Expensely</h1>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-plus-circle"></i>
+                <span>Submit Expense</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>View Expenses</span>
+            </li>
+            <li class="nav-item active">
+                <i class="fas fa-clock"></i>
+                <span>Pending Approvals</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2>Pending Approvals</h2>
+            <div class="user-info">
+                <div class="user-avatar">{{ current_user.name[0] }}</div>
+                <span>{{ current_user.name }}</span>
+            </div>
+        </div>
+
+        <div class="approvals-container">
+            {% if expenses %}
+                {% for expense in expenses %}
+                <div class="approval-card">
+                    <div class="approval-header">
+                        <div class="approval-details">
+                            <div class="approval-user">
+                                <div class="user-avatar-small">{{ expense.user.name[0] }}</div>
+                                <div>
+                                    <strong>{{ expense.user.name }}</strong>
+                                    <div style="font-size: 12px; color: var(--gray);">{{ expense.user.role }}</div>
+                                </div>
+                            </div>
+                            <div class="approval-amount">${{ "%.2f"|format(expense.amount) }}</div>
+                            <div class="approval-meta">
+                                <span><i class="fas fa-tag"></i> {{ expense.category }}</span>
+                                <span><i class="fas fa-calendar"></i> {{ expense.expense_date.strftime('%Y-%m-%d') }}</span>
+                                {% if expense.receipt_url %}
+                                <span><i class="fas fa-receipt"></i> {{ expense.receipt_url }}</span>
+                                {% endif %}
+                                <span class="status-badge status-pending">Pending Approval</span>
+                            </div>
+                            {% if expense.description %}
+                            <div class="description-box">
+                                <strong>Description:</strong>
+                                <p>{{ expense.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="approval-actions">
+                        <button class="btn btn-approve" onclick="openApproveModal('{{ expense.expense_id }}')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-reject" onclick="openRejectModal('{{ expense.expense_id }}')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="no-approvals">
+                <i class="fas fa-check-circle"></i>
+                <h3>No Pending Approvals</h3>
+                <p>All expenses have been processed. Check back later for new submissions.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Approval Modal -->
+    <div class="modal" id="approvalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Approve Expense</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="approvalComments">Comments (Optional)</label>
+                    <textarea id="approvalComments" class="form-control" rows="4" placeholder="Add any comments about this approval..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-approve" id="modalApproveBtn">
+                    <i class="fas fa-check"></i> Approve Expense
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal" id="rejectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reject Expense</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="rejectionComments">Reason for Rejection</label>
+                    <textarea id="rejectionComments" class="form-control" rows="4" placeholder="Please provide a reason for rejecting this expense..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-reject" id="modalRejectBtn">
+                    <i class="fas fa-times"></i> Reject Expense
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message" id="toastMessage">Operation completed successfully!</div>
+    </div>
+
+    <script>
+        // Global variables
+        var currentExpenseId = null;
+        var currentAction = null;
+
+        // Modal functions
+        function openApproveModal(expenseId) {
+            currentExpenseId = expenseId;
+            currentAction = 'approved';
+            document.getElementById('modalTitle').textContent = 'Approve Expense';
+            document.getElementById('approvalModal').style.display = 'flex';
+        }
+
+        function openRejectModal(expenseId) {
+            currentExpenseId = expenseId;
+            currentAction = 'rejected';
+            document.getElementById('rejectionModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('approvalModal').style.display = 'none';
+            document.getElementById('rejectionModal').style.display = 'none';
+            document.getElementById('approvalComments').value = '';
+            document.getElementById('rejectionComments').value = '';
+            currentExpenseId = null;
+            currentAction = null;
+        }
+
+        function showToast(message, type) {
+            if (type === undefined) {
+                type = 'success';
+            }
+            var toast = document.getElementById('toast');
+            var toastMessage = document.getElementById('toastMessage');
+            var toastIcon = toast.querySelector('.toast-icon i');
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.className = 'toast ' + type;
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        function submitApproval() {
+            var comments;
+            if (currentAction === 'approved') {
+                comments = document.getElementById('approvalComments').value;
+            } else {
+                comments = document.getElementById('rejectionComments').value;
+            }
+
+            if (currentAction === 'rejected' && comments.trim() === '') {
+                alert('Please provide a reason for rejection');
+                return;
+            }
+
+            var button;
+            if (currentAction === 'approved') {
+                button = document.getElementById('modalApproveBtn');
+            } else {
+                button = document.getElementById('modalRejectBtn');
+            }
+
+            var originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            button.disabled = true;
+
+            // Create the request data
+            var requestData = {
+                action: currentAction,
+                comments: comments
+            };
+
+            // Use XMLHttpRequest instead of fetch for maximum compatibility
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/approve_expense/' + currentExpenseId, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    
+                    if (xhr.status === 200) {
+                        var result = JSON.parse(xhr.responseText);
+                        if (result.success) {
+                            showToast(result.message, 'success');
+                            closeModal();
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            showToast(result.error || 'Failed to process approval', 'error');
+                        }
+                    } else {
+                        showToast('Request failed with status: ' + xhr.status, 'error');
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showToast('Network error occurred', 'error');
+            };
+            
+            xhr.send(JSON.stringify(requestData));
+        }
+
+        // Initialize event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up modal button event listeners
+            document.getElementById('modalApproveBtn').addEventListener('click', submitApproval);
+            document.getElementById('modalRejectBtn').addEventListener('click', submitApproval);
+
+            // Close modal when clicking outside
+            var modals = document.querySelectorAll('.modal');
+            for (var i = 0; i < modals.length; i++) {
+                modals[i].addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal();
+                    }
+                });
+            }
+
+            // Navigation
+            var navItems = document.querySelectorAll('.nav-item');
+            for (var i = 0; i < navItems.length; i++) {
+                navItems[i].addEventListener('click', function() {
+                    var textElement = this.querySelector('span');
+                    if (textElement) {
+                        var text = textElement.textContent;
+                        
+                        if (text === 'Dashboard') {
+                            window.location.href = "/dashboard";
+                        } else if (text === 'Submit Expense') {
+                            window.location.href = "/submit_expense";
+                        } else if (text === 'View Expenses') {
+                            window.location.href = "/view_expenses";
+                        } else if (text === 'Pending Approvals') {
+                            window.location.href = "/pending_approvals";
+                        } else if (text === 'Settings') {
+                            console.log('Settings clicked');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
