@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expensely - Smart Expense Management</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="/" class="logo">
+                <div class="logo-icon">E</div>
+                <div class="logo-text">Expensely</div>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                {% if current_user.is_authenticated %}
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/logout">Logout ({{ current_user.name }})</a>
+                {% else %}
+                    <a href="/signup">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/signup">Sign Up</a></li>
+                    <li><a href="#support">Support</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>FAQs</h3>
+                <ul class="footer-links">
+                    <li><a href="#faq1">How to create account?</a></li>
+                    <li><a href="#faq2">Reset password</a></li>
+                    <li><a href="#faq3">Manage expenses</a></li>
+                    <li><a href="#faq4">Approval process</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>About</h3>
+                <ul class="footer-links">
+                    <li><a href="#company">Our Company</a></li>
+                    <li><a href="#team">Our Team</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Features</h3>
+                <ul class="footer-links">
+                    <li><a href="#expense-tracking">Expense Tracking</a></li>
+                    <li><a href="#approval-workflow">Approval Workflow</a></li>
+                    <li><a href="#reports">Reports & Analytics</a></li>
+                    <li><a href="#integrations">Integrations</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Social Media</h3>
+                <ul class="footer-links">
+                    <li><a href="#facebook">Facebook</a></li>
+                    <li><a href="#twitter">Twitter</a></li>
+                    <li><a href="#linkedin">LinkedIn</a></li>
+                    <li><a href="#instagram">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 Expensely. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/static/validation.js"></script>
+</body>
+</html>

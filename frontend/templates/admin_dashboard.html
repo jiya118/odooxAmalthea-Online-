@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Expensely</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --border: #e0e0e0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header h2 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .card .change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card .change.positive {
+            color: var(--success);
+        }
+
+        .card .change.negative {
+            color: var(--danger);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 20px;
+        }
+
+        .card-users .card-icon {
+            background: var(--primary);
+        }
+
+        .card-expenses .card-icon {
+            background: var(--warning);
+        }
+
+        .card-reports .card-icon {
+            background: var(--info);
+        }
+
+        .card-revenue .card-icon {
+            background: var(--success);
+        }
+
+        /* User Management Section */
+        .section-title {
+            font-size: 20px;
+            margin: 30px 0 20px;
+            color: var(--dark);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .user-management {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            padding: 20px;
+            background-color: var(--light);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--light);
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-manager {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .status-employee {
+            background-color: rgba(114, 9, 183, 0.1);
+            color: var(--secondary);
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            background-color: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-btn i {
+            margin-right: 5px;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            z-index: 1100;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--danger);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .sidebar .logo h1, .sidebar .nav-item span {
+                display: none;
+            }
+            
+            .sidebar .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar .nav-item i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-chart-pie"></i>
+            <h1>Expensely</h1>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>User Management</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>Expenses</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2>Admin Dashboard</h2>
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <span>Admin User</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-cards">
+            <div class="card card-users">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Total Users</h3>
+                <div class="value" id="totalUsers">0</div>
+                <div class="change positive">
+                    <i class="fas fa-arrow-up"></i> <span id="userChange">0%</span> from last month
+                </div>
+            </div>
+            <div class="card card-expenses">
+                <div class="card-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h3>Total Expenses</h3>
+                <div class="value" id="totalExpenses">$0</div>
+                <div class="change positive">
+                    <i class="fas fa-arrow-up"></i> <span id="expenseChange">0%</span> from last month
+                </div>
+            </div>
+            <div class="card card-reports">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Reports Generated</h3>
+                <div class="value" id="totalReports">0</div>
+                <div class="change negative">
+                    <i class="fas fa-arrow-down"></i> <span id="reportChange">0%</span> from last month
+                </div>
+            </div>
+            <div class="card card-revenue">
+                <div class="card-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h3>Revenue Saved</h3>
+                <div class="value" id="totalRevenue">$0</div>
+                <div class="change positive">
+                    <i class="fas fa-arrow-up"></i> <span id="revenueChange">0%</span> from last month
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Section -->
+        <h2 class="section-title">
+            <i class="fas fa-users"></i> User Management
+        </h2>
+        <div class="user-management">
+            <div class="table-header">
+                <h3>New Users</h3>
+                <button class="btn" id="addUserBtn">
+                    <i class="fas fa-plus"></i> Add New User
+                </button>
+            </div>
+            <div id="usersTableContainer">
+                <div class="spinner" id="usersLoading"></div>
+                <table id="usersTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>User Role</th>
+                            <th>Email</th>
+                            <th>Manager</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <h2 class="section-title">
+            <i class="fas fa-history"></i> Recent Activity
+        </h2>
+        <div class="recent-activity">
+            <div class="spinner" id="activityLoading"></div>
+            <ul class="activity-list" id="activityList" style="display: none;">
+                <!-- Activities will be loaded here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label for="userName">Full Name</label>
+                        <input type="text" id="userName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email Address</label>
+                        <input type="email" id="userEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Role</label>
+                        <select id="userRole" class="form-control" required>
+                            <option value="">Select Role</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userManager">Manager</label>
+                        <select id="userManager" class="form-control" required>
+                            <option value="">Select Manager</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddUser">Cancel</button>
+                <button class="btn" id="submitAddUser">Add User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message" id="toastMessage">Operation completed successfully!</div>
+    </div>
+
+    <script>
+    // Frontend Application with REAL API calls
+    class ExpenselyAdmin {
+        constructor() {
+            this.init();
+        }
+
+        async init() {
+            // Load initial data from REAL backend
+            await this.loadDashboardStats();
+            await this.loadUsers();
+            await this.loadRecentActivities();
+            await this.loadManagers();
+
+            // Set up event listeners
+            this.setupEventListeners();
+        }
+
+        async loadDashboardStats() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                const stats = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
+                    document.getElementById('userChange').textContent = `${stats.userChange}%`;
+                    
+                    document.getElementById('totalExpenses').textContent = `$${stats.totalExpenses.toLocaleString()}`;
+                    document.getElementById('expenseChange').textContent = `${stats.expenseChange}%`;
+                    
+                    document.getElementById('totalReports').textContent = stats.totalReports.toLocaleString();
+                    document.getElementById('reportChange').textContent = `${Math.abs(stats.reportChange)}%`;
+                    
+                    document.getElementById('totalRevenue').textContent = `$${stats.totalRevenue.toLocaleString()}`;
+                    document.getElementById('revenueChange').textContent = `${stats.revenueChange}%`;
+                } else {
+                    throw new Error(stats.error || 'Failed to load stats');
+                }
+            } catch (error) {
+                console.error('Stats error:', error);
+                this.showToast('Failed to load dashboard statistics', 'error');
+            }
+        }
+
+        async loadUsers() {
+            const loadingElement = document.getElementById('usersLoading');
+            const tableElement = document.getElementById('usersTable');
+            
+            try {
+                loadingElement.style.display = 'block';
+                tableElement.style.display = 'none';
+                
+                const response = await fetch('/api/admin/users');
+                const users = await response.json();
+                
+                if (response.ok) {
+                    this.renderUsersTable(users);
+                    loadingElement.style.display = 'none';
+                    tableElement.style.display = 'table';
+                } else {
+                    throw new Error(users.error || 'Failed to load users');
+                }
+            } catch (error) {
+                console.error('Users error:', error);
+                loadingElement.style.display = 'none';
+                this.showToast('Failed to load users: ' + error.message, 'error');
+            }
+        }
+
+        renderUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                const roleClass = user.role.toLowerCase() === 'manager' ? 'status-manager' : 'status-employee';
+                const statusClass = user.status === 'active' ? 'status-active' : 'status-pending';
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="status-badge ${roleClass}">${user.name} (${user.role})</span>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${user.manager}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${user.status}</span>
+                    </td>
+                    <td>
+                        <button class="action-btn send-password-btn" data-user-id="${user.id}">
+                            <i class="fas fa-paper-plane"></i> Send Password
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            // Add event listeners to send password buttons
+            document.querySelectorAll('.send-password-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.target.closest('.send-password-btn').dataset.userId;
+                    this.handleSendPassword(userId, e.target);
+                });
+            });
+        }
+
+        async loadRecentActivities() {
+            const loadingElement = document.getElementById('activityLoading');
+            const listElement = document.getElementById('activityList');
+            
+            try {
+                loadingElement.style.display = 'block';
+                listElement.style.display = 'none';
+                
+                const response = await fetch('/api/admin/recent_activities');
+                const activities = await response.json();
+                
+                if (response.ok) {
+                    this.renderActivities(activities);
+                    loadingElement.style.display = 'none';
+                    listElement.style.display = 'block';
+                } else {
+                    throw new Error(activities.error || 'Failed to load activities');
+                }
+            } catch (error) {
+                console.error('Activities error:', error);
+                loadingElement.style.display = 'none';
+                this.showToast('Failed to load recent activities', 'error');
+            }
+        }
+
+        renderActivities(activities) {
+            const list = document.getElementById('activityList');
+            list.innerHTML = '';
+
+            // Add CSS for activity items
+            if (!document.querySelector('#activityStyles')) {
+                const style = document.createElement('style');
+                style.id = 'activityStyles';
+                style.textContent = `
+                    .activity-item {
+                        padding: 15px 0;
+                        border-bottom: 1px solid var(--border);
+                        display: flex;
+                        align-items: center;
+                    }
+                    .activity-item:last-child {
+                        border-bottom: none;
+                    }
+                    .activity-icon {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: rgba(67, 97, 238, 0.1);
+                        color: var(--primary);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 15px;
+                    }
+                    .activity-content {
+                        flex: 1;
+                    }
+                    .activity-content p {
+                        margin-bottom: 5px;
+                    }
+                    .activity-time {
+                        font-size: 12px;
+                        color: var(--gray);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            activities.forEach(activity => {
+                const item = document.createElement('li');
+                item.className = 'activity-item';
+                
+                const timeAgo = this.getTimeAgo(new Date(activity.timestamp));
+                
+                item.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas fa-${activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>${activity.message}</p>
+                        <div class="activity-time">${timeAgo} • by ${activity.user_name}</div>
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        async loadManagers() {
+            try {
+                const response = await fetch('/api/admin/managers');
+                const managers = await response.json();
+                
+                if (response.ok) {
+                    const select = document.getElementById('userManager');
+                    
+                    select.innerHTML = '<option value="">Select Manager</option>';
+                    managers.forEach(manager => {
+                        const option = document.createElement('option');
+                        option.value = manager.id;
+                        option.textContent = manager.name;
+                        select.appendChild(option);
+                    });
+                } else {
+                    throw new Error(managers.error || 'Failed to load managers');
+                }
+            } catch (error) {
+                console.error('Managers error:', error);
+                this.showToast('Failed to load managers', 'error');
+            }
+        }
+
+        async handleSendPassword(userId, button) {
+            const originalText = button.innerHTML;
+            
+            try {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                button.disabled = true;
+                
+                const response = await fetch(`/api/admin/send_password/${userId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    button.innerHTML = '<i class="fas fa-check"></i> Sent!';
+                    button.style.backgroundColor = 'var(--success)';
+                    button.style.borderColor = 'var(--success)';
+                    button.style.color = 'white';
+                    
+                    this.showToast(result.message, 'success');
+                    
+                    // Reload activities to show the new action
+                    await this.loadRecentActivities();
+                    
+                } else {
+                    throw new Error(result.error || 'Failed to send password');
+                }
+                
+            } catch (error) {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                this.showToast(error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.backgroundColor = '';
+                    button.style.borderColor = '';
+                    button.style.color = '';
+                    button.disabled = false;
+                }, 3000);
+            }
+        }
+
+        async submitAddUserForm() {
+            const formData = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role: document.getElementById('userRole').value,
+                manager_id: document.getElementById('userManager').value || null
+            };
+
+            if (!formData.name || !formData.email || !formData.role) {
+                this.showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitAddUser');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/admin/create_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    this.showToast(result.message, 'success');
+                    this.closeAddUserModal();
+                    
+                    // Reload all data to reflect changes
+                    await this.loadUsers();
+                    await this.loadRecentActivities();
+                    await this.loadDashboardStats();
+                    await this.loadManagers(); // Reload managers in case new manager was added
+                    
+                } else {
+                    throw new Error(result.error || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Create user error:', error);
+                this.showToast(error.message, 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        setupEventListeners() {
+            // Add user modal
+            document.getElementById('addUserBtn').addEventListener('click', () => {
+                this.openAddUserModal();
+            });
+
+            document.getElementById('closeModal').addEventListener('click', () => {
+                this.closeAddUserModal();
+            });
+
+            document.getElementById('cancelAddUser').addEventListener('click', () => {
+                this.closeAddUserModal();
+            });
+
+            document.getElementById('submitAddUser').addEventListener('click', (e) => {
+                e.preventDefault();
+                this.submitAddUserForm();
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('addUserModal').addEventListener('click', (e) => {
+                if (e.target.id === 'addUserModal') {
+                    this.closeAddUserModal();
+                }
+            });
+
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        openAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'flex';
+            document.getElementById('addUserForm').reset();
+        }
+
+        closeAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'none';
+        }
+
+        showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            // Update icon based on type
+            const toastIcon = toast.querySelector('.toast-icon i');
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            
+            return date.toLocaleDateString();
+        }
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+        new ExpenselyAdmin();
+    });
+</script>
+</body>
+</html>

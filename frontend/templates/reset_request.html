@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Reset Password</h1>
+            <p class="auth-subtitle">Enter your email to receive a reset OTP</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/reset_request">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" required 
+                       placeholder="Enter your registered email">
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Send Reset OTP
+            </button>
+
+            <div class="form-links mt-3">
+                <a href="/login" class="form-link">Back to Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
